@@ -1,18 +1,20 @@
 # Kinara AI Backend
 
-A lightweight Go backend service built using **Gin** and **Zap**, following clean and modular design principles. This backend powers **Kinara AI**, a Malayalam voice-based assistant for merchants in **Kerala**.
+A lightweight Go backend service built using **Gin**, **Zap**, and **Viper**, following clean and modular design principles based on the **Hexagonal Architecture**. This backend powers **Kinara AI**, a Malayalam voice-based assistant for merchants in **Kerala**.
 
 ---
 
-## Supported languages
+## 🌐 Supported Languages
 
- - Malayalam
+- Malayalam
 
 > *More to be added soon*
 
+---
+
 ## 🚀 Overview
 
-The backend currently supports uploading audio files from a client application. The uploaded audio will later flow through transcription, guardrail filtering, and AI inference pipelines.
+The backend currently supports uploading audio files from a client application. The uploaded audio can be stored locally or in **AWS S3**, based on the configuration set in `config.yaml`. Future stages will include Malayalam speech transcription, guardrail filtering, and AI inference pipelines.
 
 ---
 
@@ -20,11 +22,14 @@ The backend currently supports uploading audio files from a client application. 
 
 ```
 cmd/server/main.go        # Entry point
+config/config.yaml        # Centralized configuration file (YAML)
 internal/adapter/http     # HTTP handler (Gin)
-internal/adapter/storage  # Local file storage
+internal/adapter/storage  # Local and S3 storage adapters
 internal/service          # Core business logic
 internal/models           # API response models
+internal/port             # Storage interface definitions
 internal/pkg/logger       # Zap logging setup
+internal/pkg/config       # Viper configuration loader
 ```
 
 ---
@@ -33,7 +38,7 @@ internal/pkg/logger       # Zap logging setup
 
 ### **POST /v1/audio**
 
-Uploads an audio file to the server. Current inplementation saves it directly on the server, the next plan is to use an s3 bucket.
+Uploads an audio file to the server. Depending on configuration, it will either be stored locally under `/uploads` or uploaded directly to an **S3 bucket**.
 
 #### Request
 
@@ -69,11 +74,37 @@ curl -X POST http://localhost:8080/v1/audio \
 
 ---
 
+## ⚙️ Configuration
+
+The application configuration is managed using **Viper** and stored in `config/config.yaml`.
+
+Example:
+
+```yaml
+app:
+  port: "8080"
+
+aws:
+  use_s3: true
+  bucket: "kinara-ai-audio"
+  region: "ap-south-1"
+
+logging:
+  level: "info"
+```
+
+* Change `use_s3` to `false` to use local storage.
+* The AWS SDK automatically picks credentials from your AWS CLI or environment.
+
+---
+
 ## 🧩 Tech Stack
 
 * **Language:** Go 1.22+
 * **Framework:** Gin
 * **Logging:** Uber Zap
+* **Configuration:** Viper (YAML-based)
+* **Cloud Storage:** AWS S3
 
 ---
 

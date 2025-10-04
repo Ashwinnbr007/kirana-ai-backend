@@ -42,10 +42,8 @@ func (e *APIResponse) ToHTTPStatus() int {
 		e.StatusCode = http.StatusNotFound
 	case ErrUnauthorized:
 		e.StatusCode = http.StatusUnauthorized
-	case ErrInternal:
-		e.StatusCode = http.StatusInternalServerError
 	default:
-		return http.StatusInternalServerError
+		e.StatusCode = http.StatusInternalServerError
 	}
 	return e.StatusCode
 }

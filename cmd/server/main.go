@@ -16,7 +16,6 @@ import (
 )
 
 func main() {
-
 	if err := logger.Init(); err != nil {
 		panic("failed to initialize logger: " + err.Error())
 	}
@@ -47,12 +46,16 @@ func main() {
 	}
 
 	router := gin.Default()
-	audioService := service.NewAudioService(store)
+	transcriptionStore, err := storage.NewTranscription(log)
+	if err != nil {
+		logger.L().Fatal("failed to init transcription storage", zap.Error(err))
+	}
+	audioService := service.NewAudioService(store, transcriptionStore)
 	audioHandler := httpadapter.NewAudioHandler(audioService)
 
 	v1 := router.Group("/v1")
 	{
-		v1.POST("/audio", audioHandler.UploadAudio)
+		v1.POST("/audio", audioHandler.UploadAndTranscribeAudio)
 	}
 
 	router.Run(fmt.Sprintf(":%d", cfg.App.Port))

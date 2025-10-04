@@ -24,6 +24,34 @@ type APIResponse struct {
 	Data       interface{} `json:"data,omitempty"`
 }
 
+type TranscriptionResponse struct {
+	JobName   string              `json:"jobName"`
+	AccountID string              `json:"accountId"`
+	Results   TranscriptionResult `json:"results"`
+	Status    string              `json:"status"`
+}
+
+type Item struct {
+	StartTime    string        `json:"start_time"`
+	EndTime      string        `json:"end_time"`
+	Alternatives []Alternative `json:"alternatives"`
+	Type         string        `json:"type"`
+}
+
+type Alternative struct {
+	Confidence string `json:"confidence"`
+	Content    string `json:"content"`
+}
+
+type TranscriptionResult struct {
+	Transcripts []Transcript `json:"transcripts"`
+	Items       []Item       `json:"items"`
+}
+
+type Transcript struct {
+	Transcript string `json:"transcript"`
+}
+
 func (e *APIResponse) ToHTTPStatus() int {
 	if e.StatusCode != 0 {
 		return e.StatusCode

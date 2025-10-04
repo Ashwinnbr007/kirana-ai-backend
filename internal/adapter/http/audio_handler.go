@@ -1,9 +1,12 @@
 package httpadapter
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/logger"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -17,7 +20,11 @@ func NewAudioHandler(audioService *service.AudioService) *AudioHandler {
 	return &AudioHandler{audioService: audioService}
 }
 
-func (h *AudioHandler) UploadAudio(c *gin.Context) {
+func (h *AudioHandler) UploadAndTranscribeAudio(c *gin.Context) {
+	cfg, err := config.LoadConfig(".")
+	if err != nil {
+		logger.L().Error("failed to load config: %w", zap.Error(err))
+	}
 	file, err := c.FormFile("file")
 	if err != nil {
 		apiError := models.APIResponse{
@@ -49,8 +56,8 @@ func (h *AudioHandler) UploadAudio(c *gin.Context) {
 		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
 		return
 	}
-
-	fileName, err := h.audioService.SaveAudio(c.Request.Context(), file.Filename, data)
+	ctx := c.Request.Context()
+	fileName, err := h.audioService.SaveAudio(ctx, file.Filename, data)
 	if err != nil {
 		apiError := models.APIResponse{
 			Status:  models.ErrInternal,
@@ -60,13 +67,21 @@ func (h *AudioHandler) UploadAudio(c *gin.Context) {
 		return
 	}
 
-	responseData := models.UploadResult{
-		File: fileName,
+	transcriptionJobName := fmt.Sprintf("%s_transcription_job", fileName)
+	err = h.audioService.TranscribeAudio(ctx, transcriptionJobName, cfg.AWSConfig.S3Bucket, fileName)
+	if err != nil {
+		logger.L().Error("there was an error during transcription: %w", zap.Error(err))
 	}
+	transcriptionJobNameJSON := fmt.Sprintf("%s.json", transcriptionJobName)
+	transcriptionResponse, err := h.audioService.FetchTranscriptionJSON(ctx, cfg.AWSConfig.S3Bucket, transcriptionJobNameJSON)
+	if err != nil {
+		logger.L().Error("an error occured while fetching the transcription: %w", zap.Error(err))
+	}
+
 	apiResponse := models.APIResponse{
 		Status:  models.StatusCreated,
-		Message: "file uploaded successfully",
-		Data:    responseData,
+		Message: "successfully uploaded and transcribed",
+		Data:    transcriptionResponse,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
 }

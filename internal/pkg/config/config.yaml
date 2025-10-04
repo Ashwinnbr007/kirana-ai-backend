@@ -6,3 +6,4 @@ aws_config:
   use_s3: true
   bucket: "kirana-ai-audio"
   region: "ap-south-1"
+  

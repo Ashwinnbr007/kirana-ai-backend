@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.39.2
 	github.com/aws/aws-sdk-go-v2/config v1.31.12
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.3
+	github.com/aws/aws-sdk-go-v2/service/transcribe v1.52.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/spf13/viper v1.21.0
 	go.uber.org/zap v1.27.0

@@ -3,8 +3,8 @@ package httpadapter
 import (
 	"io"
 
-	"github.com/Ashwinnbr007/kinara-ai-backend/internal/models"
-	"github.com/Ashwinnbr007/kinara-ai-backend/internal/service"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

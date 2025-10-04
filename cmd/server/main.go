@@ -6,13 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	httpadapter "github.com/Ashwinnbr007/kinara-ai-backend/internal/adapter/http"
-	"github.com/Ashwinnbr007/kinara-ai-backend/internal/adapter/storage"
-	"github.com/Ashwinnbr007/kinara-ai-backend/internal/pkg/config"
-	"github.com/Ashwinnbr007/kinara-ai-backend/internal/pkg/logger"
-	"github.com/Ashwinnbr007/kinara-ai-backend/internal/port"
+	httpadapter "github.com/Ashwinnbr007/kirana-ai-backend/internal/adapter/http"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/adapter/storage"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/logger"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/port"
 
-	"github.com/Ashwinnbr007/kinara-ai-backend/internal/service"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 )
 
 func main() {

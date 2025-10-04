@@ -4,5 +4,5 @@ app:
 
 aws_config:
   use_s3: true
-  bucket: "kinara-ai-audio"
+  bucket: "kirana-ai-audio"
   region: "ap-south-1"

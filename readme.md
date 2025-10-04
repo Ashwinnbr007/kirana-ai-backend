@@ -1,6 +1,6 @@
-# Kinara AI Backend
+# Kirana AI Backend
 
-A lightweight Go backend service built using **Gin**, **Zap**, and **Viper**, following clean and modular design principles based on the **Hexagonal Architecture**. This backend powers **Kinara AI**, a Malayalam voice-based assistant for merchants in **Kerala**.
+A lightweight Go backend service built using **Gin**, **Zap**, and **Viper**, following clean and modular design principles based on the **Hexagonal Architecture**. This backend powers **kirana AI**, a Malayalam voice-based assistant for merchants in **Kerala**.
 
 ---
 
@@ -86,7 +86,7 @@ app:
 
 aws:
   use_s3: true
-  bucket: "kinara-ai-audio"
+  bucket: "kirana-ai-audio"
   region: "ap-south-1"
 
 logging:
@@ -110,4 +110,4 @@ logging:
 
 ## 🧠 Author
 
-**Ashwin Nambiar** — Founder & Engineer, Kinara AI
+**Ashwin Nambiar** — Founder & Engineer, kirana AI

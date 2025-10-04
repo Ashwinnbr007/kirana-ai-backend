@@ -1,4 +1,4 @@
-module github.com/Ashwinnbr007/kinara-ai-backend
+module github.com/Ashwinnbr007/kirana-ai-backend
 
 go 1.25
 

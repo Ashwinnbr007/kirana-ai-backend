@@ -24,11 +24,18 @@ func main() {
 	log := logger.L()
 	log.Info("Logger initialized successfully")
 
-	cfg, err := config.LoadConfig("../../internal/pkg/config")
+	projectRoot, err := config.FindProjectRoot()
+	if err != nil {
+		logger.L().Error("could not find the project root", zap.Error(err))
+		projectRoot = "."
+	}
+	configPath := fmt.Sprintf("%s/internal/pkg/config", projectRoot)
+	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
 		logger.L().Fatal("failed to load config", zap.Error(err))
 	}
 	var store port.StoragePort
+
 	if cfg.AWSConfig.UseS3 {
 		s3Store, err := storage.NewS3Storage(cfg.AWSConfig.S3Bucket, log)
 		if err != nil {
@@ -38,6 +45,7 @@ func main() {
 	} else {
 		store = storage.NewLocalStorage("uploads")
 	}
+
 	router := gin.Default()
 	audioService := service.NewAudioService(store)
 	audioHandler := httpadapter.NewAudioHandler(audioService)

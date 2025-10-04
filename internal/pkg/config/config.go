@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 )
@@ -19,6 +21,28 @@ type App struct {
 type Config struct {
 	App       App       `mapstructure:"app" validate:"required"`
 	AWSConfig AWSConfig `mapstructure:"aws_config" validate:"omitempty"`
+}
+
+func FindProjectRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return dir, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("project root not found (no go.mod or .git)")
+		}
+		dir = parent
+	}
 }
 
 func LoadConfig(path string) (Config, error) {

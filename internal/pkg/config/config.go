@@ -12,8 +12,12 @@ type AWSConfig struct {
 	AWSRegion string `mapstructure:"region"`
 }
 
+type App struct {
+	Port int `mapstructure:"port" validate:"required"`
+}
+
 type Config struct {
-	AppPort   int       `mapstructure:"app_port" validate:"required"`
+	App       App       `mapstructure:"app" validate:"required"`
 	AWSConfig AWSConfig `mapstructure:"aws_config" validate:"omitempty"`
 }
 

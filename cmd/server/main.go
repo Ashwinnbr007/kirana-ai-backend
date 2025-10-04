@@ -47,5 +47,5 @@ func main() {
 		v1.POST("/audio", audioHandler.UploadAudio)
 	}
 
-	router.Run(fmt.Sprintf(":%d", cfg.AppPort))
+	router.Run(fmt.Sprintf(":%d", cfg.App.Port))
 }

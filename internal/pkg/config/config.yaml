@@ -1,0 +1,8 @@
+
+
+app_port: 8080
+
+aws_config:
+  use_s3: true
+  bucket: "kinara-ai-audio"
+  region: "ap-south-1"

@@ -8,6 +8,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+type AiConfig struct {
+	Model           string  `mapstructure:"model" validate:"required"`
+	Temperature     float64 `mapstructure:"temperature"`
+	ReasoningEffort string  `mapstructure:"reasoning_effort" validate:"omitempty"`
+}
+
 type AWSConfig struct {
 	UseS3     bool   `mapstructure:"use_s3"`
 	S3Bucket  string `mapstructure:"bucket"`
@@ -19,8 +25,9 @@ type App struct {
 }
 
 type Config struct {
-	App       App       `mapstructure:"app" validate:"required"`
-	AWSConfig AWSConfig `mapstructure:"aws_config" validate:"omitempty"`
+	App              App       `mapstructure:"app" validate:"required"`
+	AWSConfig        AWSConfig `mapstructure:"aws_config" validate:"omitempty"`
+	AiConfiguaration AiConfig  `mapstructure:"ai_config" validate:"required"`
 }
 
 func FindProjectRoot() (string, error) {

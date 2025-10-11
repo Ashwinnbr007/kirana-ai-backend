@@ -144,13 +144,10 @@ func (h *AudioHandler) FetchTranscription(c *gin.Context) {
 	}
 
 	// Creating the final response
-	responseData := map[string]models.TranscriptionResponse{
-		"response": *transcriptionResponse,
-	}
 	apiResponse := models.APIResponse{
-		Status:  models.StatusCreated,
+		Status:  models.StatusOK,
 		Message: "successfully uploaded and transcribed",
-		Data:    responseData,
+		Data:    &transcriptionResponse.Results.Transcripts[0],
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
 }

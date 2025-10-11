@@ -25,10 +25,13 @@ type APIResponse struct {
 }
 
 type TranscriptionResponse struct {
-	JobName   string              `json:"jobName"`
-	AccountID string              `json:"accountId"`
-	Results   TranscriptionResult `json:"results"`
-	Status    string              `json:"status"`
+	Results struct {
+		Transcripts []Transcript `json:"transcripts"`
+	} `json:"results"`
+}
+
+type Transcript struct {
+	Transcript string `json:"transcript"`
 }
 
 type Item struct {
@@ -41,15 +44,6 @@ type Item struct {
 type Alternative struct {
 	Confidence string `json:"confidence"`
 	Content    string `json:"content"`
-}
-
-type TranscriptionResult struct {
-	Transcripts []Transcript `json:"transcripts"`
-	Items       []Item       `json:"items"`
-}
-
-type Transcript struct {
-	Transcript string `json:"transcript"`
 }
 
 func (e *APIResponse) ToHTTPStatus() int {

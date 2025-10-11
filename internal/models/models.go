@@ -35,6 +35,9 @@ type APIResponse struct {
 	Data       interface{} `json:"data,omitempty"`
 }
 
+// global api response models
+
+// transcription models
 type TranscriptionResponse struct {
 	Results struct {
 		Transcripts []Transcript `json:"transcripts"`
@@ -45,17 +48,7 @@ type Transcript struct {
 	Transcript string `json:"transcript"`
 }
 
-type Item struct {
-	StartTime    string        `json:"start_time"`
-	EndTime      string        `json:"end_time"`
-	Alternatives []Alternative `json:"alternatives"`
-	Type         string        `json:"type"`
-}
-
-type Alternative struct {
-	Confidence string `json:"confidence"`
-	Content    string `json:"content"`
-}
+// transcription models
 
 func (e *APIResponse) ToHTTPStatus() int {
 	if e.StatusCode != 0 {

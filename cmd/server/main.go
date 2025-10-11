@@ -8,6 +8,7 @@ import (
 
 	httpadapter "github.com/Ashwinnbr007/kirana-ai-backend/internal/adapter/http"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/adapter/storage"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/logger"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/port"
@@ -47,6 +48,7 @@ func main() {
 		store = storage.NewLocalStorage("uploads")
 	}
 
+	models.InitSupportedLanguages(cfg.App.SupportedLanguages)
 	router := gin.Default()
 	transcriptionStore, err := storage.NewTranscription(log)
 	if err != nil {

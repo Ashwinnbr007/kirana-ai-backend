@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/spf13/viper"
 )
 
@@ -21,7 +22,8 @@ type AWSConfig struct {
 }
 
 type App struct {
-	Port int `mapstructure:"port" validate:"required"`
+	Port               int               `mapstructure:"port" validate:"required"`
+	SupportedLanguages []models.Language `mapstructure:"supported_languages" validate:"required"`
 }
 
 type Config struct {

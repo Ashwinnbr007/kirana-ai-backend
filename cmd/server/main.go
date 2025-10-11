@@ -35,6 +35,7 @@ func main() {
 	}
 
 	var store port.StoragePort
+	var aiPort port.AiPort
 
 	if cfg.AWSConfig.UseS3 {
 		s3Store, err := storage.NewS3Storage(cfg.AWSConfig.S3Bucket, log)
@@ -51,14 +52,23 @@ func main() {
 	if err != nil {
 		logger.L().Fatal("failed to init transcription storage", zap.Error(err))
 	}
+
+	// Initialise services
 	audioService := service.NewAudioService(store, transcriptionStore)
+	aiService := service.NewAiService(aiPort)
+
+	// Initialise handlers
 	audioHandler := httpadapter.NewAudioHandler(audioService)
+	aiHandler := httpadapter.NewAiHandler(aiService)
 
 	v1 := router.Group("/v1")
 	{
 		v1.POST("/upload", audioHandler.UploadAudio)
+
 		v1.POST("/transcribe/:fileName", audioHandler.CreateTranscriptionJob)
 		v1.GET("/transcribe/:fileName", audioHandler.FetchTranscription)
+
+		v1.POST("/translate", aiHandler.TranslateToEnglish)
 	}
 
 	router.Run(fmt.Sprintf(":%d", cfg.App.Port))

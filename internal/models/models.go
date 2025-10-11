@@ -1,6 +1,8 @@
 package models
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Status string
 
@@ -17,6 +19,15 @@ const (
 	StatusNoContent Status = "STATUS_NOCONTENT"
 )
 
+// AI data models
+type TranslateApiBody struct {
+	TextToTranslate string `json:"text_to_translate" binding:"required"`
+	Language        string `json:"language" binding:"required"`
+}
+
+// AI data models
+
+// global api response models
 type APIResponse struct {
 	Status     Status      `json:"status"`
 	Message    string      `json:"message"`

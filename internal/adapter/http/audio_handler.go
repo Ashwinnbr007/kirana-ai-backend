@@ -20,11 +20,7 @@ func NewAudioHandler(audioService *service.AudioService) *AudioHandler {
 	return &AudioHandler{audioService: audioService}
 }
 
-func (h *AudioHandler) UploadAndTranscribeAudio(c *gin.Context) {
-	cfg, err := config.LoadConfig(".")
-	if err != nil {
-		logger.L().Error("failed to load config: %w", zap.Error(err))
-	}
+func (h *AudioHandler) UploadAudio(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		apiError := models.APIResponse{
@@ -66,22 +62,95 @@ func (h *AudioHandler) UploadAndTranscribeAudio(c *gin.Context) {
 		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
 		return
 	}
-
-	transcriptionJobName := fmt.Sprintf("%s_transcription_job", fileName)
-	err = h.audioService.TranscribeAudio(ctx, transcriptionJobName, cfg.AWSConfig.S3Bucket, fileName)
-	if err != nil {
-		logger.L().Error("there was an error during transcription: %w", zap.Error(err))
-	}
-	transcriptionJobNameJSON := fmt.Sprintf("%s.json", transcriptionJobName)
-	transcriptionResponse, err := h.audioService.FetchTranscriptionJSON(ctx, cfg.AWSConfig.S3Bucket, transcriptionJobNameJSON)
-	if err != nil {
-		logger.L().Error("an error occured while fetching the transcription: %w", zap.Error(err))
+	// Creating the final response
+	responseData := map[string]string{
+		"filename": fileName,
 	}
 
 	apiResponse := models.APIResponse{
 		Status:  models.StatusCreated,
+		Message: "file Uploaded succesfully",
+		Data:    responseData,
+	}
+	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
+}
+
+func (h *AudioHandler) CreateTranscriptionJob(c *gin.Context) {
+
+	fileName := c.Param("fileName")
+	ctx := c.Request.Context()
+
+	if fileName == "" {
+		apiError := models.APIResponse{
+			Status:  models.ErrInvalidInput,
+			Message: "file name is not provided in the path",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	cfg, err := config.LoadConfig(".")
+	if err != nil {
+		logger.L().Error("failed to load config: %w", zap.Error(err))
+	}
+
+	transcriptionJobName := fmt.Sprintf("%s_transcription_job", fileName)
+	err = h.audioService.TranscribeAudio(ctx, transcriptionJobName, cfg.AWSConfig.S3Bucket, fileName)
+	if err != nil {
+		logger.L().Error("there was an error during creation of the transcription job: %w", zap.Error(err))
+	}
+	transcriptionJobNameJSON := fmt.Sprintf("%s.json", transcriptionJobName)
+
+	// Creating the final response
+	responseData := map[string]string{
+		"transcrption_job_name": transcriptionJobNameJSON,
+	}
+	apiResponse := models.APIResponse{
+		Status:  models.StatusAccepted,
+		Message: "transcription job created",
+		Data:    responseData,
+	}
+	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
+}
+
+func (h *AudioHandler) FetchTranscription(c *gin.Context) {
+
+	fileName := c.Param("fileName")
+
+	if fileName == "" {
+		apiError := models.APIResponse{
+			Status:  models.ErrInvalidInput,
+			Message: "file name is not provided in the path",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	ctx := c.Request.Context()
+	cfg, err := config.LoadConfig(".")
+	if err != nil {
+		logger.L().Error("failed to load config: %w", zap.Error(err))
+	}
+
+	transcriptionResponse, err := h.audioService.FetchTranscriptionJSON(ctx, cfg.AWSConfig.S3Bucket, fileName)
+	if err != nil {
+		logger.L().Error("there is some error tryng to fetch the transcrition: %w", zap.Error(err))
+		apiError := models.APIResponse{
+			Status:  models.ErrInternal,
+			Message: "file name is not provided in the path",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	// Creating the final response
+	responseData := map[string]models.TranscriptionResponse{
+		"response": *transcriptionResponse,
+	}
+	apiResponse := models.APIResponse{
+		Status:  models.StatusCreated,
 		Message: "successfully uploaded and transcribed",
-		Data:    transcriptionResponse,
+		Data:    responseData,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
 }

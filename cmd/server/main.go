@@ -33,6 +33,7 @@ func main() {
 	if err != nil {
 		logger.L().Fatal("failed to load config", zap.Error(err))
 	}
+
 	var store port.StoragePort
 
 	if cfg.AWSConfig.UseS3 {
@@ -55,7 +56,9 @@ func main() {
 
 	v1 := router.Group("/v1")
 	{
-		v1.POST("/audio", audioHandler.UploadAndTranscribeAudio)
+		v1.POST("/upload", audioHandler.UploadAudio)
+		v1.POST("/transcribe/:fileName", audioHandler.CreateTranscriptionJob)
+		v1.GET("/transcribe/:fileName", audioHandler.FetchTranscription)
 	}
 
 	router.Run(fmt.Sprintf(":%d", cfg.App.Port))

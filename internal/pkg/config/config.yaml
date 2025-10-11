@@ -4,11 +4,11 @@ app:
 
 aws_config:
   use_s3: true
-  bucket: "kirana-ai-audio"
-  region: "ap-south-1"
+  bucket: kirana-ai-audio
+  region: ap-south-1
 
 ai_config: 
-  model: "gpt-5-mini"
+  model: gpt-5-mini
   temperature: 
-  reasoning_effort: "minimal"
+  reasoning_effort: minimal
   

@@ -38,17 +38,11 @@ func main() {
 		logger.L().Fatal("failed to load config", zap.Error(err))
 	}
 
-	var store port.StoragePort
 	var aiPort port.AiPort
 
-	if cfg.AWSConfig.UseS3 {
-		s3Store, err := storage.NewS3Storage(cfg.AWSConfig.S3Bucket, log)
-		if err != nil {
-			logger.L().Fatal("failed to init s3 storage", zap.Error(err))
-		}
-		store = s3Store
-	} else {
-		store = storage.NewLocalStorage("uploads")
+	s3Store, err := storage.NewS3Storage(cfg.AWSConfig.S3Bucket, log, cfg.App.LocalDir)
+	if err != nil {
+		logger.L().Fatal("failed to init s3 storage", zap.Error(err))
 	}
 
 	models.InitSupportedLanguages(cfg.App.SupportedLanguages)
@@ -65,7 +59,7 @@ func main() {
 	restyClient := resty.New()
 
 	// Initialise services
-	audioService := service.NewAudioService(store)
+	audioService := service.NewAudioService(s3Store)
 	aiService := service.NewAiService(aiPort, openAiClient, restyClient)
 
 	// Initialise handlers

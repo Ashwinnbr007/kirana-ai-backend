@@ -16,7 +16,6 @@ type AiConfig struct {
 }
 
 type AWSConfig struct {
-	UseS3     bool   `mapstructure:"use_s3"`
 	S3Bucket  string `mapstructure:"bucket"`
 	AWSRegion string `mapstructure:"region"`
 }
@@ -24,6 +23,7 @@ type AWSConfig struct {
 type App struct {
 	Port               int               `mapstructure:"port" validate:"required"`
 	SupportedLanguages []models.Language `mapstructure:"supported_languages" validate:"required"`
+	LocalDir           string            `mapstructure:"local_dir"`
 }
 
 type Config struct {

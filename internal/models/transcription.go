@@ -8,6 +8,12 @@ const (
 	LanguageMalayalam Language = "ml-IN"
 )
 
+type TranscriptionResponse struct {
+	LanguageCode    string `json:"language_code"`
+	Text            string `json:"text"`
+	TranscriptionId string `json:"transcription_id"`
+}
+
 var SupportedLanguagesMap map[string]bool
 
 func InitSupportedLanguages(languages []Language) interface{} {

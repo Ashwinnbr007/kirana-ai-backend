@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/port"
 	promptfactory "github.com/Ashwinnbr007/kirana-ai-backend/internal/prompt_factory"
+	"github.com/go-resty/resty/v2"
 	openai "github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 )
@@ -16,10 +18,11 @@ import (
 type AiService struct {
 	aiPort       port.AiPort
 	openAiClient *openai.Client
+	restyClient  *resty.Client
 }
 
-func NewAiService(aiPort port.AiPort, openAiClient *openai.Client) *AiService {
-	return &AiService{aiPort: aiPort, openAiClient: openAiClient}
+func NewAiService(aiPort port.AiPort, openAiClient *openai.Client, restyClient *resty.Client) *AiService {
+	return &AiService{aiPort: aiPort, openAiClient: openAiClient, restyClient: restyClient}
 }
 
 func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, transcriptionLangugae string) (*openai.ChatCompletionResponse, error) {
@@ -95,4 +98,31 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string) 
 	}
 
 	return inventoryData, nil
+}
+
+func (s *AiService) TranscribeAudio(ctx context.Context, audioFile string) (*models.TranscriptionResponse, error) {
+
+	var transcriptionResponse *models.TranscriptionResponse
+
+	resp, err := s.restyClient.R().
+		SetContext(ctx).
+		SetHeader("xi-api-key", os.Getenv("ELEVENLABS_API_KEY")).
+		SetFile("file", audioFile).
+		SetFormData(map[string]string{
+			"model_id":      "scribe_v1",
+			"language_code": "mal",
+		}).
+		SetResult(&transcriptionResponse).
+		Post(models.ELEVEN_LABS_BASE_URL + models.ELEVEN_LABS_V1 + models.ELEVEN_LABS_SPEECH_TO_TEXT_ENDPOINT)
+
+	if err != nil {
+		return nil, fmt.Errorf("unknonw error occurred while transcribing: %w", err)
+	}
+
+	if resp.IsError() {
+		zap.L().Error("Request failed: ", zap.Any("status code: ", resp.StatusCode()))
+		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode())
+	}
+
+	return transcriptionResponse, nil
 }

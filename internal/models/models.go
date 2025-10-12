@@ -37,8 +37,6 @@ type InventoryData struct {
 	TotalCostOfProduct        float32 `json:"total_cost_of_product"`
 }
 
-// AI data models
-
 // global api response models
 type APIResponse struct {
 	Status     Status      `json:"status"`
@@ -46,21 +44,6 @@ type APIResponse struct {
 	StatusCode int         `json:"status_code"`
 	Data       interface{} `json:"data,omitempty"`
 }
-
-// global api response models
-
-// transcription models
-type TranscriptionResponse struct {
-	Results struct {
-		Transcripts []Transcript `json:"transcripts"`
-	} `json:"results"`
-}
-
-type Transcript struct {
-	Transcript string `json:"transcript"`
-}
-
-// transcription models
 
 func (e *APIResponse) ToHTTPStatus() int {
 	if e.StatusCode != 0 {

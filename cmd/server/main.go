@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-resty/resty/v2"
 	"github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 
@@ -31,7 +32,7 @@ func main() {
 		logger.L().Error("could not find the project root", zap.Error(err))
 		projectRoot = "."
 	}
-	configPath := fmt.Sprintf("%s/internal/pkg/config", projectRoot)
+	configPath := fmt.Sprintf("%s/%s", projectRoot, models.CONFIG_PATH)
 	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
 		logger.L().Fatal("failed to load config", zap.Error(err))
@@ -39,12 +40,6 @@ func main() {
 
 	var store port.StoragePort
 	var aiPort port.AiPort
-
-	openaiApiKey := os.Getenv("OPENAI_API_KEY")
-	if openaiApiKey == "" {
-		logger.L().Fatal("please check your env variable: OPENAI_API_KEY, looks like it is null", zap.Error(err))
-	}
-	openAiClient := openai.NewClient(openaiApiKey)
 
 	if cfg.AWSConfig.UseS3 {
 		s3Store, err := storage.NewS3Storage(cfg.AWSConfig.S3Bucket, log)
@@ -58,14 +53,20 @@ func main() {
 
 	models.InitSupportedLanguages(cfg.App.SupportedLanguages)
 	router := gin.Default()
-	transcriptionStore, err := storage.NewTranscription(log)
 	if err != nil {
 		logger.L().Fatal("failed to init transcription storage", zap.Error(err))
 	}
+	// Initialise clients
+	openaiApiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiApiKey == "" {
+		logger.L().Fatal("please check your env variable: OPENAI_API_KEY, looks like it is null", zap.Error(err))
+	}
+	openAiClient := openai.NewClient(openaiApiKey)
+	restyClient := resty.New()
 
 	// Initialise services
-	audioService := service.NewAudioService(store, transcriptionStore)
-	aiService := service.NewAiService(aiPort, openAiClient)
+	audioService := service.NewAudioService(store)
+	aiService := service.NewAiService(aiPort, openAiClient, restyClient)
 
 	// Initialise handlers
 	audioHandler := httpadapter.NewAudioHandler(audioService)
@@ -75,9 +76,7 @@ func main() {
 	{
 		v1.POST("/upload", audioHandler.UploadAudio)
 
-		v1.POST("/transcribe/:fileName", audioHandler.CreateTranscriptionJob)
-		v1.GET("/transcribe/:fileName", audioHandler.FetchTranscription)
-
+		v1.POST("/transcribe/:fileName", aiHandler.TranscribeAudio)
 		v1.POST("/translate_to_english", aiHandler.TranslateToEnglish)
 		v1.POST("/english_to_inventory", aiHandler.DataToJsonTranslation)
 	}

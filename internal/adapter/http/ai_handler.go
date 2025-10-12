@@ -1,9 +1,11 @@
 package httpadapter
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -102,6 +104,41 @@ func (a *AiHandler) DataToJsonTranslation(c *gin.Context) {
 		Status:  models.StatusOK,
 		Message: "successfully converted to inventory data",
 		Data:    inventoryData,
+	}
+	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
+}
+
+func (a *AiHandler) TranscribeAudio(c *gin.Context) {
+	fileName := c.Param("fileName")
+	ctx := c.Request.Context()
+
+	if fileName == "" {
+		apiError := models.APIResponse{
+			Status:  models.ErrInvalidInput,
+			Message: "file name is not provided in the path",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	projectRoot, _ := config.FindProjectRoot()
+	filePath := fmt.Sprintf("%s/%s/%s", projectRoot, models.LOCAL_SAVE_PATH, fileName)
+
+	transcriptionResponse, err := a.aiService.TranscribeAudio(ctx, filePath)
+	if err != nil {
+		apiError := models.APIResponse{
+			Status:  models.ErrInternal,
+			Message: "An unknown error occurred",
+			Data:    err.Error(),
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	apiResponse := models.APIResponse{
+		Status:  models.StatusOK,
+		Message: "successfully transcribed audio",
+		Data:    transcriptionResponse,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
 }

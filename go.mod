@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.3
 	github.com/aws/aws-sdk-go-v2/service/transcribe v1.52.6
 	github.com/gin-gonic/gin v1.11.0
+	github.com/go-resty/resty/v2 v2.16.5
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/spf13/viper v1.21.0
 	go.uber.org/zap v1.27.0

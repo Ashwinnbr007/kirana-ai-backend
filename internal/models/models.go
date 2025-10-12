@@ -25,6 +25,18 @@ type TranslateApiBody struct {
 	Language        string `json:"language" binding:"required"`
 }
 
+type InventoryApiBody struct {
+	InventoryInput string `json:"inventory_input" binding:"required"`
+}
+
+type InventoryData struct {
+	Item                      string  `json:"item"`
+	Quantity                  float32 `json:"quantity"`
+	Unit                      string  `json:"unit"`
+	WholesalePricePerQuantity float32 `json:"wholesale_price_per_quantity"`
+	TotalCostOfProduct        float32 `json:"total_cost_of_product"`
+}
+
 // AI data models
 
 // global api response models

@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 
 	httpadapter "github.com/Ashwinnbr007/kirana-ai-backend/internal/adapter/http"
@@ -38,6 +40,12 @@ func main() {
 	var store port.StoragePort
 	var aiPort port.AiPort
 
+	openaiApiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiApiKey == "" {
+		logger.L().Fatal("please check your env variable: OPENAI_API_KEY, looks like it is null", zap.Error(err))
+	}
+	openAiClient := openai.NewClient(openaiApiKey)
+
 	if cfg.AWSConfig.UseS3 {
 		s3Store, err := storage.NewS3Storage(cfg.AWSConfig.S3Bucket, log)
 		if err != nil {
@@ -57,7 +65,7 @@ func main() {
 
 	// Initialise services
 	audioService := service.NewAudioService(store, transcriptionStore)
-	aiService := service.NewAiService(aiPort)
+	aiService := service.NewAiService(aiPort, openAiClient)
 
 	// Initialise handlers
 	audioHandler := httpadapter.NewAudioHandler(audioService)
@@ -70,7 +78,8 @@ func main() {
 		v1.POST("/transcribe/:fileName", audioHandler.CreateTranscriptionJob)
 		v1.GET("/transcribe/:fileName", audioHandler.FetchTranscription)
 
-		v1.POST("/translate", aiHandler.TranslateToEnglish)
+		v1.POST("/translate_to_english", aiHandler.TranslateToEnglish)
+		v1.POST("/english_to_inventory", aiHandler.DataToJsonTranslation)
 	}
 
 	router.Run(fmt.Sprintf(":%d", cfg.App.Port))

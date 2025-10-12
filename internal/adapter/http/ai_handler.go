@@ -1,6 +1,8 @@
 package httpadapter
 
 import (
+	"strings"
+
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 	"github.com/gin-gonic/gin"
@@ -46,10 +48,20 @@ func (a *AiHandler) TranslateToEnglish(c *gin.Context) {
 	translatedText, err := a.aiService.TranslateToEnglish(ctx, translateApiBody.TextToTranslate, translateApiBody.Language)
 	if err != nil {
 		zap.L().Error("an error occured tyring to translate to english: ", zap.Any("error: ", err))
-		apiError := models.APIResponse{
-			Status:  models.ErrInternal,
-			Message: "An unknown error occurred",
-			Data:    err,
+		var apiError models.APIResponse
+
+		if strings.Contains(err.Error(), "sorry, please input inventory or sales data only") {
+			apiError = models.APIResponse{
+				Status:  models.ErrInvalidInput,
+				Message: "Error, please check your input",
+				Data:    err.Error(),
+			}
+		} else {
+			apiError = models.APIResponse{
+				Status:  models.ErrInternal,
+				Message: "An unknown error occurred",
+				Data:    err.Error(),
+			}
 		}
 		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
 		return
@@ -59,6 +71,37 @@ func (a *AiHandler) TranslateToEnglish(c *gin.Context) {
 		Status:  models.StatusOK,
 		Message: "translation successfull",
 		Data:    translatedText,
+	}
+	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
+}
+
+func (a *AiHandler) DataToJsonTranslation(c *gin.Context) {
+	var inventoryApiBody models.InventoryApiBody
+	if err := c.BindJSON(&inventoryApiBody); err != nil {
+		apiError := models.APIResponse{
+			Status:  models.ErrInvalidInput,
+			Message: "Bad request, the request is invalid",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	ctx := c.Request.Context()
+	var inventoryData *[]models.InventoryData
+	inventoryData, err := a.aiService.DataToJsonTranslation(ctx, inventoryApiBody.InventoryInput)
+	if err != nil {
+		apiError := models.APIResponse{
+			Status:  models.ErrInternal,
+			Message: "An unknown error occurred",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	apiResponse := models.APIResponse{
+		Status:  models.StatusOK,
+		Message: "successfully converted to inventory data",
+		Data:    inventoryData,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
 }

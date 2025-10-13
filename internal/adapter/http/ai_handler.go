@@ -157,7 +157,7 @@ func (a *AiHandler) SalesDataToJsonTranslation(c *gin.Context) {
 
 	apiResponse := models.APIResponse{
 		Status:  models.StatusOK,
-		Message: "successfully converted to inventory data",
+		Message: "successfully converted to sales data",
 		Data:    salesData,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)

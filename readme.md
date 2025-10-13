@@ -1,6 +1,6 @@
 # Kirana AI Backend
 
-A lightweight Go backend service built using **Gin**, **Zap**, and **Viper**, following clean and modular design principles based on the **Hexagonal Architecture**. This backend powers **kirana AI**, a Malayalam voice-based assistant for merchants in **Kerala**.
+A lightweight Go backend service built using **Gin**, **Zap**, following clean and modular design principles based on the **Hexagonal Architecture**. This backend powers **kirana AI**, a Malayalam voice-based assistant for merchants in **Kerala**.
 
 ---
 

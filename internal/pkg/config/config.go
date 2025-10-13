@@ -24,6 +24,15 @@ type App struct {
 	Port               int               `mapstructure:"port" validate:"required"`
 	SupportedLanguages []models.Language `mapstructure:"supported_languages" validate:"required"`
 	LocalDir           string            `mapstructure:"local_dir"`
+	Database           Database          `mapstructure:"database" validate:"required"`
+}
+
+type Database struct {
+	Port   int    `mapstructure:"port" validate:"required"`
+	Host   string `mapstructure:"host" validate:"required"`
+	User   string `mapstructure:"user" validate:"required"`
+	DbName string `mapstructure:"dbname" validate:"required"`
+	Type   string `mapstructure:"type" validate:"required"`
 }
 
 type Config struct {

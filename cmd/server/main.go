@@ -14,7 +14,6 @@ import (
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/logger"
-	"github.com/Ashwinnbr007/kirana-ai-backend/internal/port"
 
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 )
@@ -38,8 +37,6 @@ func main() {
 		logger.L().Fatal("failed to load config", zap.Error(err))
 	}
 
-	var aiPort port.AiPort
-
 	s3Store, err := storage.NewS3Storage(cfg.AWSConfig.S3Bucket, log, cfg.App.LocalDir)
 	if err != nil {
 		logger.L().Fatal("failed to init s3 storage", zap.Error(err))
@@ -58,9 +55,17 @@ func main() {
 	openAiClient := openai.NewClient(openaiApiKey)
 	restyClient := resty.New()
 
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		cfg.App.Database.Host, cfg.App.Database.Port, cfg.App.Database.User, os.Getenv(models.DATABASE_PASSWORD_KEY), cfg.App.Database.DbName, "disable")
+
+	db := storage.NewReposiory(cfg.App.Database.Type, connStr)
+	if db == nil {
+		zap.L().Panic("Could not initialize database")
+	}
+
 	// Initialise services
 	audioService := service.NewAudioService(s3Store)
-	aiService := service.NewAiService(aiPort, openAiClient, restyClient)
+	aiService := service.NewAiService(openAiClient, restyClient, db)
 
 	// Initialise handlers
 	audioHandler := httpadapter.NewAudioHandler(audioService)

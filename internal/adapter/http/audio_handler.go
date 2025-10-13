@@ -1,19 +1,23 @@
 package httpadapter
 
 import (
+	"context"
 	"io"
 
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
-	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-type AudioHandler struct {
-	audioService *service.AudioService
+type AudioService interface {
+	SaveAudio(ctx context.Context, filename string, data []byte) (string, error)
 }
 
-func NewAudioHandler(audioService *service.AudioService) *AudioHandler {
+type AudioHandler struct {
+	audioService AudioService
+}
+
+func NewAudioHandler(audioService AudioService) *AudioHandler {
 	return &AudioHandler{audioService: audioService}
 }
 

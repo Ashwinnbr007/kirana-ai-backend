@@ -1,21 +1,28 @@
 package httpadapter
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
-	"github.com/Ashwinnbr007/kirana-ai-backend/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 )
 
-type AiHandler struct {
-	aiService *service.AiService
+type AiService interface {
+	TranslateToEnglish(ctx context.Context, transcription, transcriptionLangugae string) (*openai.ChatCompletionResponse, error)
+	DataToJsonTranslation(ctx context.Context, chatText string, typeOfRecord string) (any, error)
+	TranscribeAudio(ctx context.Context, audioFile string) (*models.TranscriptionResponse, error)
 }
 
-func NewAiHandler(aiService *service.AiService) *AiHandler {
+type AiHandler struct {
+	aiService AiService
+}
+
+func NewAiHandler(aiService AiService) *AiHandler {
 	return &AiHandler{
 		aiService: aiService,
 	}
@@ -114,7 +121,7 @@ func (a *AiHandler) InventoryDataToJsonTranslation(c *gin.Context) {
 
 	apiResponse := models.APIResponse{
 		Status:  models.StatusOK,
-		Message: "successfully converted to inventory data",
+		Message: "successfully stored inventory data to database",
 		Data:    inventoryData,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
@@ -157,7 +164,7 @@ func (a *AiHandler) SalesDataToJsonTranslation(c *gin.Context) {
 
 	apiResponse := models.APIResponse{
 		Status:  models.StatusOK,
-		Message: "successfully converted to sales data",
+		Message: "successfully stored sales data to database",
 		Data:    salesData,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)

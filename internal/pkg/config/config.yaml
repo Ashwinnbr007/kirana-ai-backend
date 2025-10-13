@@ -4,6 +4,12 @@ app:
   supported_languages:
     - ml-IN
   local_dir: uploads
+  database:
+    host: localhost
+    port: 5432
+    user: postgres
+    dbname: kirani
+    type: postgres
 
 aws_config:
   bucket: kirana-ai-audio

@@ -8,21 +8,29 @@ import (
 	"strings"
 
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
-	"github.com/Ashwinnbr007/kirana-ai-backend/internal/port"
 	promptfactory "github.com/Ashwinnbr007/kirana-ai-backend/internal/prompt_factory"
 	"github.com/go-resty/resty/v2"
 	openai "github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 )
 
-type AiService struct {
-	aiPort       port.AiPort
-	openAiClient *openai.Client
-	restyClient  *resty.Client
+type DatabasePort interface {
+	WriteInventoryData(ctx context.Context, data *[]models.InventoryData) error
+	WriteSalesData(ctx context.Context, data *[]models.SalesData) error
 }
 
-func NewAiService(aiPort port.AiPort, openAiClient *openai.Client, restyClient *resty.Client) *AiService {
-	return &AiService{aiPort: aiPort, openAiClient: openAiClient, restyClient: restyClient}
+type AiService struct {
+	openAiClient *openai.Client
+	restyClient  *resty.Client
+	db           DatabasePort
+}
+
+func NewAiService(openAiClient *openai.Client, restyClient *resty.Client, db DatabasePort) *AiService {
+	return &AiService{
+		openAiClient: openAiClient,
+		restyClient:  restyClient,
+		db:           db,
+	}
 }
 
 func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, transcriptionLangugae string) (*openai.ChatCompletionResponse, error) {
@@ -106,6 +114,18 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string, 
 	if err != nil {
 		zap.L().Error("error during unmarshaling of inventory data")
 		return nil, fmt.Errorf("error during unmarshaling of inventory data")
+	}
+
+	switch typeOfRecord {
+	case models.INVENTORY_RECORD_IDENTIFIER:
+		err = s.db.WriteInventoryData(ctx, jsonData.(*[]models.InventoryData))
+	case models.SALES_RECORD_IDENTIFIER:
+		err = s.db.WriteSalesData(ctx, jsonData.(*[]models.SalesData))
+	}
+
+	if err != nil {
+		zap.L().Error("error during updation of database")
+		return nil, fmt.Errorf("error during updation of database")
 	}
 
 	return jsonData, nil

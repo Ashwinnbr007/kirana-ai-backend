@@ -4,15 +4,17 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/Ashwinnbr007/kirana-ai-backend/internal/port"
 )
 
-type AudioService struct {
-	storage port.StoragePort
+type StoragePort interface {
+	Save(ctx context.Context, filename string, data []byte) error
 }
 
-func NewAudioService(storage port.StoragePort) *AudioService {
+type AudioService struct {
+	storage StoragePort
+}
+
+func NewAudioService(storage StoragePort) *AudioService {
 	return &AudioService{storage: storage}
 }
 

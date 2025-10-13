@@ -72,7 +72,8 @@ func main() {
 
 		v1.POST("/transcribe/:fileName", aiHandler.TranscribeAudio)
 		v1.POST("/translate_to_english", aiHandler.TranslateToEnglish)
-		v1.POST("/english_to_inventory", aiHandler.DataToJsonTranslation)
+		v1.POST("/english_to_inventory", aiHandler.InventoryDataToJsonTranslation)
+		v1.POST("/english_to_sales", aiHandler.SalesDataToJsonTranslation)
 	}
 
 	router.Run(fmt.Sprintf(":%d", cfg.App.Port))

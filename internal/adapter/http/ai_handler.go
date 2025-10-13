@@ -77,8 +77,9 @@ func (a *AiHandler) TranslateToEnglish(c *gin.Context) {
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
 }
 
-func (a *AiHandler) DataToJsonTranslation(c *gin.Context) {
-	var inventoryApiBody models.InventoryApiBody
+func (a *AiHandler) InventoryDataToJsonTranslation(c *gin.Context) {
+
+	var inventoryApiBody models.DataInputApiBody
 	if err := c.BindJSON(&inventoryApiBody); err != nil {
 		apiError := models.APIResponse{
 			Status:  models.ErrInvalidInput,
@@ -89,9 +90,20 @@ func (a *AiHandler) DataToJsonTranslation(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	var inventoryData *[]models.InventoryData
-	inventoryData, err := a.aiService.DataToJsonTranslation(ctx, inventoryApiBody.InventoryInput)
+	var result any
+	result, err := a.aiService.DataToJsonTranslation(ctx, inventoryApiBody.Input, models.INVENTORY_RECORD_IDENTIFIER)
 	if err != nil {
+		apiError := models.APIResponse{
+			Status:  models.ErrInternal,
+			Message: "An unknown error occurred",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	inventoryData, ok := result.(*[]models.InventoryData)
+	if !ok {
+		zap.L().Error("An error occured during type assertion in inventory data")
 		apiError := models.APIResponse{
 			Status:  models.ErrInternal,
 			Message: "An unknown error occurred",
@@ -104,6 +116,49 @@ func (a *AiHandler) DataToJsonTranslation(c *gin.Context) {
 		Status:  models.StatusOK,
 		Message: "successfully converted to inventory data",
 		Data:    inventoryData,
+	}
+	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
+}
+
+func (a *AiHandler) SalesDataToJsonTranslation(c *gin.Context) {
+
+	var salesApiBody models.DataInputApiBody
+	if err := c.BindJSON(&salesApiBody); err != nil {
+		apiError := models.APIResponse{
+			Status:  models.ErrInvalidInput,
+			Message: "Bad request, the request is invalid",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	ctx := c.Request.Context()
+	var result any
+	result, err := a.aiService.DataToJsonTranslation(ctx, salesApiBody.Input, models.SALES_RECORD_IDENTIFIER)
+	if err != nil {
+		apiError := models.APIResponse{
+			Status:  models.ErrInternal,
+			Message: "An unknown error occurred",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	salesData, ok := result.(*[]models.SalesData)
+	if !ok {
+		zap.L().Error("An error occured during type assertion in inventory data")
+		apiError := models.APIResponse{
+			Status:  models.ErrInternal,
+			Message: "An unknown error occurred",
+		}
+		c.JSON(apiError.ToHTTPStatus(), gin.H{"error": apiError})
+		return
+	}
+
+	apiResponse := models.APIResponse{
+		Status:  models.StatusOK,
+		Message: "successfully converted to inventory data",
+		Data:    salesData,
 	}
 	c.JSON(apiResponse.ToHTTPStatus(), apiResponse)
 }

@@ -30,8 +30,7 @@ func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, trans
 	resp, err := s.openAiClient.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: openai.GPT5ChatLatest,
-			// ReasoningEffort: "minimal",
+			Model: openai.GPT5Mini,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleDeveloper,
@@ -60,7 +59,21 @@ func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, trans
 	return &resp, nil
 }
 
-func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string) (*[]models.InventoryData, error) {
+func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string, typeOfRecord string) (any, error) {
+
+	var prompt string
+	var jsonData any
+
+	switch typeOfRecord {
+	case models.INVENTORY_RECORD_IDENTIFIER:
+		prompt = promptfactory.INVENTORY_DATA_TO_JSON_PROMPT
+		jsonData = &[]models.InventoryData{}
+	case models.SALES_RECORD_IDENTIFIER:
+		prompt = promptfactory.SALES_DATA_TO_JSON_PROMPT
+		jsonData = &[]models.SalesData{}
+	default:
+		return nil, fmt.Errorf("given type of record is neither sales nor inventory, please check and retry")
+	}
 
 	resp, err := s.openAiClient.CreateChatCompletion(
 		context.Background(),
@@ -74,7 +87,7 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string) 
 				},
 				{
 					Role:    openai.ChatMessageRoleSystem,
-					Content: promptfactory.DATA_TO_JSON_PROMPT,
+					Content: prompt,
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -89,15 +102,13 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string) 
 		return nil, fmt.Errorf("ChatCompletion error: %w", err)
 	}
 
-	var inventoryData *[]models.InventoryData
-
-	err = json.Unmarshal([]byte(resp.Choices[0].Message.Content), &inventoryData)
+	err = json.Unmarshal([]byte(resp.Choices[0].Message.Content), &jsonData)
 	if err != nil {
 		zap.L().Error("error during unmarshaling of inventory data")
 		return nil, fmt.Errorf("error during unmarshaling of inventory data")
 	}
 
-	return inventoryData, nil
+	return jsonData, nil
 }
 
 func (s *AiService) TranscribeAudio(ctx context.Context, audioFile string) (*models.TranscriptionResponse, error) {

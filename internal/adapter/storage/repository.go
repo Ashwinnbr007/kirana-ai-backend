@@ -107,7 +107,7 @@ func (r *Repository) WriteSalesData(ctx context.Context, data *[]models.SalesDat
 	}()
 
 	const insertSQL = `
-        INSERT INTO inventory (item, quantity, unit, retail_price_per_quantity, total_selling_price)
+        INSERT INTO public.sales (item, quantity, unit, retail_price_per_quantity, total_selling_price)
         VALUES ($1, $2, $3, $4, $5);
     `
 

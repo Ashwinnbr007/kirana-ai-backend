@@ -38,7 +38,7 @@ func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, trans
 	resp, err := s.openAiClient.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: openai.GPT5Mini,
+			Model: openai.GPT5ChatLatest,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleDeveloper,
@@ -86,7 +86,7 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string, 
 	resp, err := s.openAiClient.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:           openai.GPT5Mini,
+			Model:           openai.GPT5Nano,
 			ReasoningEffort: "minimal",
 			Messages: []openai.ChatCompletionMessage{
 				{

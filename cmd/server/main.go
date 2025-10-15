@@ -66,14 +66,19 @@ func main() {
 	// Initialise services
 	audioService := service.NewAudioService(s3Store)
 	aiService := service.NewAiService(openAiClient, restyClient, db)
+	qrService := service.NewQrService(db)
 
 	// Initialise handlers
 	audioHandler := httpadapter.NewAudioHandler(audioService)
 	aiHandler := httpadapter.NewAiHandler(aiService)
+	qrHandler := httpadapter.NewQrHandler(qrService)
 
 	v1 := router.Group("/v1")
 	{
-		v1.POST("/upload", audioHandler.UploadAudio)
+		v1.POST("/upload_audio", audioHandler.UploadAudio)
+
+		v1.GET("/upload_qr", qrHandler.ExtractInventory)
+		v1.POST("/update_database", qrHandler.Extract)
 
 		v1.POST("/transcribe/:fileName", aiHandler.TranscribeAudio)
 		v1.POST("/translate_to_english", aiHandler.TranslateToEnglish)

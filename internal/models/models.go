@@ -31,10 +31,10 @@ type DataInputApiBody struct {
 
 type InventoryData struct {
 	Item                      string  `json:"item"`
-	Quantity                  float32 `json:"quantity"`
+	Quantity                  float64 `json:"quantity"`
 	Unit                      string  `json:"unit"`
-	WholesalePricePerQuantity float32 `json:"wholesale_price_per_quantity"`
-	TotalCostOfProduct        float32 `json:"total_cost_of_product"`
+	WholesalePricePerQuantity float64 `json:"wholesale_price_per_quantity"`
+	TotalCostOfProduct        float64 `json:"total_cost_of_product"`
 }
 type SalesData struct {
 	Item                   string  `json:"item"`

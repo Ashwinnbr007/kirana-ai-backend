@@ -15,7 +15,8 @@ import (
 )
 
 type DatabasePort interface {
-	WriteInventoryData(ctx context.Context, data *[]models.InventoryData) error
+	WriteInventoryData(ctx context.Context, data *models.InventoryData) error
+	WriteMultipleInventoryData(ctx context.Context, data *[]models.InventoryData) error
 	WriteSalesData(ctx context.Context, data *[]models.SalesData) error
 }
 
@@ -118,7 +119,7 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string, 
 
 	switch typeOfRecord {
 	case models.INVENTORY_RECORD_IDENTIFIER:
-		err = s.db.WriteInventoryData(ctx, jsonData.(*[]models.InventoryData))
+		err = s.db.WriteMultipleInventoryData(ctx, jsonData.(*[]models.InventoryData))
 	case models.SALES_RECORD_IDENTIFIER:
 		err = s.db.WriteSalesData(ctx, jsonData.(*[]models.SalesData))
 	}

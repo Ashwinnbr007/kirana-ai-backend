@@ -26,7 +26,17 @@ func NewReposiory(databaseType, connStr string) *Repository {
 	}
 }
 
-func (r *Repository) WriteInventoryData(ctx context.Context, data *[]models.InventoryData) error {
+func (r *Repository) WriteMultipleInventoryData(ctx context.Context, data *[]models.InventoryData) error {
+
+	for _, item := range *data {
+		r.WriteInventoryData(ctx, &item)
+	}
+
+	return nil
+
+}
+
+func (r *Repository) WriteInventoryData(ctx context.Context, data *models.InventoryData) error {
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -58,19 +68,17 @@ func (r *Repository) WriteInventoryData(ctx context.Context, data *[]models.Inve
     `
 
 	// 2. Iterate through the data slice and execute the prepared statement within the transaction
-	for i, item := range *data {
-		_, err = tx.ExecContext(
-			ctx,
-			insertSQL,
-			item.Item,
-			item.Quantity,
-			item.Unit,
-			item.WholesalePricePerQuantity,
-			item.TotalCostOfProduct,
-		)
-		if err != nil {
-			return fmt.Errorf("failed to insert item %d (%s): %w", i, item.Item, err)
-		}
+	_, err = tx.ExecContext(
+		ctx,
+		insertSQL,
+		data.Item,
+		data.Quantity,
+		data.Unit,
+		data.WholesalePricePerQuantity,
+		data.TotalCostOfProduct,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to insert item (%s): %w", data.Item, err)
 	}
 
 	// 3. Commit the transaction if all insertions were successful

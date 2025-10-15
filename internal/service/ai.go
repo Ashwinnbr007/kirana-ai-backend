@@ -51,7 +51,7 @@ func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, trans
 		sb.WriteString(line)
 	}
 
-	finalPrompt := strings.Replace(
+	translationPrompt := strings.Replace(
 		promptfactory.TRANSLATION_PROMPT,
 		promptfactory.CONTEXT_PLACEHOLDER,
 		sb.String(),
@@ -69,7 +69,7 @@ func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, trans
 				},
 				{
 					Role:    openai.ChatMessageRoleSystem,
-					Content: finalPrompt,
+					Content: translationPrompt,
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,

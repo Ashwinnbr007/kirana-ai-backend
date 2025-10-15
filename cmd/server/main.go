@@ -11,6 +11,7 @@ import (
 
 	httpadapter "github.com/Ashwinnbr007/kirana-ai-backend/internal/adapter/http"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/adapter/storage"
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/constants"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/logger"
@@ -31,7 +32,7 @@ func main() {
 		logger.L().Error("could not find the project root", zap.Error(err))
 		projectRoot = "."
 	}
-	configPath := fmt.Sprintf("%s/%s", projectRoot, models.CONFIG_PATH)
+	configPath := fmt.Sprintf("%s/%s", projectRoot, constants.CONFIG_PATH)
 	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
 		logger.L().Fatal("failed to load config", zap.Error(err))
@@ -56,7 +57,7 @@ func main() {
 	restyClient := resty.New()
 
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		cfg.App.Database.Host, cfg.App.Database.Port, cfg.App.Database.User, os.Getenv(models.DATABASE_PASSWORD_KEY), cfg.App.Database.DbName, "disable")
+		cfg.App.Database.Host, cfg.App.Database.Port, cfg.App.Database.User, os.Getenv(constants.DATABASE_PASSWORD_KEY), cfg.App.Database.DbName, "disable")
 
 	db := storage.NewReposiory(cfg.App.Database.Type, connStr)
 	if db == nil {

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/constants"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	promptfactory "github.com/Ashwinnbr007/kirana-ai-backend/internal/prompt_factory"
 	"github.com/go-resty/resty/v2"
@@ -74,10 +75,10 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string, 
 	var jsonData any
 
 	switch typeOfRecord {
-	case models.INVENTORY_RECORD_IDENTIFIER:
+	case constants.INVENTORY_RECORD_IDENTIFIER:
 		prompt = promptfactory.INVENTORY_DATA_TO_JSON_PROMPT
 		jsonData = &[]models.InventoryData{}
-	case models.SALES_RECORD_IDENTIFIER:
+	case constants.SALES_RECORD_IDENTIFIER:
 		prompt = promptfactory.SALES_DATA_TO_JSON_PROMPT
 		jsonData = &[]models.SalesData{}
 	default:
@@ -118,9 +119,9 @@ func (s *AiService) DataToJsonTranslation(ctx context.Context, chatText string, 
 	}
 
 	switch typeOfRecord {
-	case models.INVENTORY_RECORD_IDENTIFIER:
+	case constants.INVENTORY_RECORD_IDENTIFIER:
 		err = s.db.WriteMultipleInventoryData(ctx, jsonData.(*[]models.InventoryData))
-	case models.SALES_RECORD_IDENTIFIER:
+	case constants.SALES_RECORD_IDENTIFIER:
 		err = s.db.WriteSalesData(ctx, jsonData.(*[]models.SalesData))
 	}
 
@@ -145,7 +146,7 @@ func (s *AiService) TranscribeAudio(ctx context.Context, audioFile string) (*mod
 			"language_code": "mal",
 		}).
 		SetResult(&transcriptionResponse).
-		Post(models.ELEVEN_LABS_BASE_URL + models.ELEVEN_LABS_V1 + models.ELEVEN_LABS_SPEECH_TO_TEXT_ENDPOINT)
+		Post(constants.ELEVEN_LABS_BASE_URL + constants.ELEVEN_LABS_V1 + constants.ELEVEN_LABS_SPEECH_TO_TEXT_ENDPOINT)
 
 	if err != nil {
 		return nil, fmt.Errorf("unknonw error occurred while transcribing: %w", err)

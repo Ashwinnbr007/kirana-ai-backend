@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Ashwinnbr007/kirana-ai-backend/internal/constants"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/models"
 	"github.com/Ashwinnbr007/kirana-ai-backend/internal/pkg/config"
 	"github.com/gin-gonic/gin"
@@ -98,7 +99,7 @@ func (a *AiHandler) InventoryDataToJsonTranslation(c *gin.Context) {
 
 	ctx := c.Request.Context()
 	var result any
-	result, err := a.aiService.DataToJsonTranslation(ctx, inventoryApiBody.Input, models.INVENTORY_RECORD_IDENTIFIER)
+	result, err := a.aiService.DataToJsonTranslation(ctx, inventoryApiBody.Input, constants.INVENTORY_RECORD_IDENTIFIER)
 	if err != nil {
 		apiError := models.APIResponse{
 			Status:  models.ErrInternal,
@@ -141,7 +142,7 @@ func (a *AiHandler) SalesDataToJsonTranslation(c *gin.Context) {
 
 	ctx := c.Request.Context()
 	var result any
-	result, err := a.aiService.DataToJsonTranslation(ctx, salesApiBody.Input, models.SALES_RECORD_IDENTIFIER)
+	result, err := a.aiService.DataToJsonTranslation(ctx, salesApiBody.Input, constants.SALES_RECORD_IDENTIFIER)
 	if err != nil {
 		apiError := models.APIResponse{
 			Status:  models.ErrInternal,
@@ -184,7 +185,7 @@ func (a *AiHandler) TranscribeAudio(c *gin.Context) {
 	}
 
 	projectRoot, _ := config.FindProjectRoot()
-	filePath := fmt.Sprintf("%s/%s/%s", projectRoot, models.LOCAL_SAVE_PATH, fileName)
+	filePath := fmt.Sprintf("%s/%s/%s", projectRoot, constants.LOCAL_SAVE_PATH, fileName)
 
 	transcriptionResponse, err := a.aiService.TranscribeAudio(ctx, filePath)
 	if err != nil {

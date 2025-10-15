@@ -1,4 +1,4 @@
-package models
+package constants
 
 const (
 	LOCAL_SAVE_PATH = "uploads"

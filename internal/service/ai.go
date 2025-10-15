@@ -19,6 +19,7 @@ type DatabasePort interface {
 	WriteInventoryData(ctx context.Context, data *models.InventoryData) error
 	WriteMultipleInventoryData(ctx context.Context, data *[]models.InventoryData) error
 	WriteSalesData(ctx context.Context, data *[]models.SalesData) error
+	ReadInventoryData(ctx context.Context) ([]models.InventoryData, error)
 }
 
 type AiService struct {
@@ -37,6 +38,26 @@ func NewAiService(openAiClient *openai.Client, restyClient *resty.Client, db Dat
 
 func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, transcriptionLangugae string) (*openai.ChatCompletionResponse, error) {
 
+	contextualData, err := s.db.ReadInventoryData(ctx)
+	if err != nil {
+		zap.L().Warn("there was an error trying to fetch the context for translation", zap.Any("error: ", err))
+	}
+
+	var sb strings.Builder
+	sb.WriteString("Product Inventory:\n")
+
+	for _, p := range contextualData {
+		line := fmt.Sprintf("  - Item: %s, Qty: %.2f, Price: %.2f, Unit: %sf\n", p.Item, p.Quantity, p.TotalCostOfProduct, p.Unit)
+		sb.WriteString(line)
+	}
+
+	finalPrompt := strings.Replace(
+		promptfactory.TRANSLATION_PROMPT,
+		promptfactory.CONTEXT_PLACEHOLDER,
+		sb.String(),
+		1,
+	)
+
 	resp, err := s.openAiClient.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
@@ -48,7 +69,7 @@ func (s *AiService) TranslateToEnglish(ctx context.Context, transcription, trans
 				},
 				{
 					Role:    openai.ChatMessageRoleSystem,
-					Content: promptfactory.TRANSLATION_PROMPT,
+					Content: finalPrompt,
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,

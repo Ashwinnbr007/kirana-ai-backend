@@ -38,10 +38,10 @@ type InventoryData struct {
 }
 type SalesData struct {
 	Item                   string  `json:"item"`
-	Quantity               float32 `json:"quantity"`
+	Quantity               float64 `json:"quantity"`
 	Unit                   string  `json:"unit"`
-	RetailPricePerQuantity float32 `json:"retail_price_per_quantity"`
-	TotalSellingPrice      float32 `json:"total_selling_price"`
+	RetailPricePerQuantity float64 `json:"retail_price_per_quantity"`
+	TotalSellingPrice      float64 `json:"total_selling_price"`
 }
 
 // global api response models

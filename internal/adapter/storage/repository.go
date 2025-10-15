@@ -36,6 +36,28 @@ func (r *Repository) WriteMultipleInventoryData(ctx context.Context, data *[]mod
 
 }
 
+func (r *Repository) ReadInventoryData(ctx context.Context) ([]models.InventoryData, error) {
+	const readSQL = `
+        SELECT * from public.inventory
+    `
+
+	rows, err := r.db.QueryContext(ctx, readSQL)
+	if err != nil {
+		return nil, fmt.Errorf("there was some error trying to retrieve data from inventory database: %w", err)
+	}
+
+	var inventoryData []models.InventoryData
+	for rows.Next() {
+		var inventorySchema models.InventoryData
+		if err := rows.Scan(&inventorySchema.Item, &inventorySchema.Quantity, &inventorySchema.Unit, &inventorySchema.WholesalePricePerQuantity, &inventorySchema.TotalCostOfProduct); err != nil {
+			return nil, fmt.Errorf("failed to scan the inventory data: %w", err)
+		}
+		inventoryData = append(inventoryData, inventorySchema)
+	}
+
+	return inventoryData, nil
+}
+
 func (r *Repository) WriteInventoryData(ctx context.Context, data *models.InventoryData) error {
 
 	tx, err := r.db.BeginTx(ctx, nil)

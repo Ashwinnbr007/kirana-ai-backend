@@ -34,6 +34,4 @@ Turn 1 Shopkeeper:
 Inventory: Banana 50kg 2000rs total.
 Turn 1 Assistant:
 [{ "item": "mango", "quantity": 10, "unit": "kg", "retail_price_per_quantity": 120, "total_selling_price": 1200 }]
-
-
 `
